@@ -18,20 +18,20 @@
 
 ## 📌 Overview
 
-Varnish Cache VCL / varnishd / Hitch configuration hardening auditor
+
+OVarnishX is an offline, read-only Varnish Cache configuration auditor that parses VCL files and systemd/init service arguments with stdlib-only parsers. It reviews the admin/CLI interface and secret-file exposure, ACL definitions for PURGE/BAN, backend TLS, header handling and cache-poisoning risks. Findings are mapped to CWE and MITRE ATT&CK, scored and graded, and exported as TXT, Markdown, JSON, CSV or SARIF.
 
 ---
 
 ## ✨ Features
 
-- Stdlib VCL parser — comments, long strings {"..."}, include "..."; following with loop detection, backend / probe / acl blocks, sub bodies (concatenated like varnishd)
-- varnishd command line — /etc/default/varnish DAEMON_OPTS, /etc/sysconfig/varnish, varnish.params, systemd ExecStart + drop-ins: -a -T -S -M -f -s -j -u -n -p parameters
-- Management CLI exposure (-T 0.0.0.0 / public), -S secret missing / world-readable / weak, jail & privilege checks
-- VCL logic — PURGE / BAN without ACL, wide purge ACLs, return(pipe) for all, builtin bypass caching Authorization and Cookie requests, Set-Cookie TTL, hash_data(host), X-Forwarded-Host poisoning, XFF trust, std.log credentials, synthetic error leaks, ESI, inline C, backend timeouts
-- varnishncsa logging and Hitch TLS terminator (hitch.conf)
-- Secrets masked everywhere; --root offline trees; CWE + MITRE
-- Export TXT / Markdown / JSON / CSV / SARIF 2.1.0
-- Self-test --demo, CI gates --fail-on / --min-severity
+
+- VCL parser (vcl_recv/backend/deliver subs, ACLs, backends, includes) plus systemd/init varnishd args
+- Admin interface checks: -T bind address, -S secret file presence/perms and management exposure
+- PURGE/BAN ACL review, client.ip trust, X-Forwarded-For handling and cache-poisoning vectors
+- Backend security: TLS to origin, host-header validation and health-probe exposure
+- Header hygiene (Set-Cookie caching, Vary, sensitive header leakage) and VMOD risk notes
+- CWE+ATT&CK mapping, offline --root trees, score/grade and TXT/MD/JSON/CSV/SARIF export
 
 ---
 
@@ -44,8 +44,13 @@ Varnish Cache VCL / varnishd / Hitch configuration hardening auditor
 
 ## 🚀 Usage
 
+
 ```bash
-./OVarnishX
+./OVarnishX --scan -f sarif -o varnish.sarif
+./OVarnishX --vcl /etc/varnish/default.vcl --service /etc/systemd/system/varnish.service
+./OVarnishX -r /mnt/image --fail-on high --json
+./OVarnishX --demo
+./OVarnishX --help
 ```
 
 ---
